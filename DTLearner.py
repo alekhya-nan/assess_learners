@@ -9,39 +9,37 @@ class DTLearner(object):
         return "anandula3"
 
     def add_evidence(self, data_x, data_y):
-        """
-        Add training data to learner
+        self.tree = self.build_tree(data_x, data_y)
 
-        :param data_x: A set of feature values used to train the learner
-        :type data_x: numpy.ndarray
-        :param data_y: The value we are attempting to predict given the X data
-        :type data_y: numpy.ndarray
-        """
-
-        concat_data = np.concatenate([data_x, data_y], axis=1)
-        print(concat_data.shape)
-        print(self.build_tree(concat_data))
-
-    def build_tree(self, data):
+    def build_tree(self, data_x, data_y):
         # if we're at a leaf node, then return 0
-        if data.shape[0] == 1:
-            return_leaf = np.array([-1, data[0][0], -1, -1])
+        assert data_x.shape[1] == 2
+        assert data_y.shape[1] == 1
+        if data_x.shape[0] == 1:
+            return_leaf = np.array([-1, data_y[0][0], -1, -1])
             return return_leaf.reshape((1, 4))
         # if all y values are the same (compare to the first item in the y column), then return leaf node
-        if np.all(data[0,-1] == data[:,-1], axis = 0):
-            return_leaf = np.array([-1, data[0][0], -1, -1])
+        if np.all(data_y == data_y[0], axis = 0):
+            return_leaf = np.array([-1, data_y[0][0], -1, -1])
             return return_leaf.reshape((1, 4))
         
         # determine best feature to split on
-        i = 0
+        concat_data = np.concatenate([data_x, data_y], axis=1)
+        correlation = np.corrcoef(concat_data, rowvar=False)[-1,:-1]
+        correlation = np.abs(correlation)
+        i = np.argmax(correlation)
 
-        
-        split_val = np.median(data[:,i])
-        left_tree = self.build_tree(data[data[:,i]<=split_val])
-        right_tree = self.build_tree(data[data[:,i]>split_val])
+        # splitting value
+        split_val = np.median(data_x[:,i])
 
-        root = np.array([i, split_val, 1, left_tree.shape[0]+1])
-        root = root.reshape((1, 4))
+        # building the left tree
+        left_split_condition = data_x[:,i]<=split_val
+        left_tree = self.build_tree(data_x[left_split_condition], data_y[left_split_condition])
+        # building the right tree
+        right_split_condition = data_x[:,i]>split_val
+        right_tree = self.build_tree(data_x[right_split_condition], data_y[right_split_condition])
+
+        root = np.array([i, split_val, 1, left_tree.shape[0]+1]).reshape((1, 4))
         concat_tree = np.concatenate([root, left_tree, right_tree], axis=0)
         return concat_tree
 

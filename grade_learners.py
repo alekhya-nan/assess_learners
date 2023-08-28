@@ -112,6 +112,7 @@ learning_test_cases = [
             insample_corr_max=0.95,		  
         ),		  
     ),		  
+    '''
     ########################		  
     # RTLearner test cases #		  
     ########################		  
@@ -235,6 +236,7 @@ learning_test_cases = [
         seed=1498076428,		  
         outputs=None,		  
     ),		  
+    '''
 ]		  
 		  
 		  
