@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 
 class DTLearner(object):
-    def __init__(self, verbose=False):
+    def __init__(self, leaf_size: int, verbose=False):
+        self.leaf_size = leaf_size
         self.verbose=verbose
 
     def author(self):
@@ -15,8 +16,9 @@ class DTLearner(object):
         # if we're at a leaf node, then return 0
         assert data_x.shape[1] == 2
         assert data_y.shape[1] == 1
-        if data_x.shape[0] == 1:
-            return_leaf = np.array([-1, data_y[0][0], -1, -1])
+        if data_x.shape[0] <= self.leaf_size:
+            leaf_pred = np.mean(data_y)
+            return_leaf = np.array([-1, leaf_pred, -1, -1])
             return return_leaf.reshape((1, 4))
         # if all y values are the same (compare to the first item in the y column), then return leaf node
         if np.all(data_y == data_y[0], axis = 0):
@@ -67,5 +69,5 @@ if __name__ == "__main__":
     print(x[:5], x.shape)
     print(y[:5], y.shape)
 
-    dtlearner = DTLearner()
+    dtlearner = DTLearner(leaf_size=1)
     dtlearner.add_evidence(x, y)
