@@ -54,9 +54,29 @@ class DTLearner(object):
         :return: The predicted result of the input data according to the trained model
         :rtype: numpy.ndarray
         """
-        return (self.model_coefs[:-1] * points).sum(axis=1) + self.model_coefs[
-            -1
-        ]
+        values = []
+
+        for idx, point in enumerate(points):
+            value = self.query_point(point)
+            values.append(value)
+
+        values = np.array(values)
+        return values
+    
+    def query_point(self, point):
+        
+        current_idx = 0
+        ## keep going while the 
+        while node[0] != -1:
+            node = self.tree[current_idx]
+            i = node[0]
+            split_val = node[1]
+            if point[i] <= split_val:
+                current_idx += node[2]
+            else:
+                current_idx += node[3]
+
+        return node[1]
 
 
 if __name__ == "__main__":
