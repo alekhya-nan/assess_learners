@@ -17,15 +17,13 @@ class DTLearner(object):
 
     def build_tree(self, data_x, data_y):
         # if we're at a leaf node, then return 0
-        print("data", data_x.shape, data_y.shape)
         if data_x.shape[0] <= self.leaf_size:
-            print("in returning leaf size...")
             leaf_pred = np.mean(data_y)
             return_leaf = np.array([-1, leaf_pred, -1, -1])
             return return_leaf.reshape((1, 4))
+
         # if all y values are the same (compare to the first item in the y column), then return leaf node
-        if np.all(data_y == data_y[0], axis = 0):
-            print("returning if all y is same")
+        if np.allclose(data_y.flatten(), data_y[0][0], atol=0.000001):
             return_leaf = np.array([-1, data_y[0][0], -1, -1])
             return return_leaf.reshape((1, 4))
         
@@ -34,13 +32,8 @@ class DTLearner(object):
         correlation = np.corrcoef(concat_data, rowvar=False)[-1,:-1]
         correlation = np.abs(correlation)
         i = np.argmax(correlation)
-
-        print("concat_data", concat_data.shape, correlation.shape, i)
-        # splitting value
         split_val = np.median(data_x[:,i])
 
-        print("concat_data", concat_data.shape, correlation.shape, i, data_x[:,i], split_val)
-        print(data_x, data_y)
         # building the left tree
         left_split_condition = data_x[:,i]<=split_val
 
@@ -49,15 +42,14 @@ class DTLearner(object):
             return_leaf = np.array([-1, leaf_pred, -1, -1])
             return return_leaf.reshape((1, 4))
         
-        print("left_split_condition",left_split_condition)
         left_tree = self.build_tree(data_x[left_split_condition], data_y[left_split_condition])
-        # building the right tree
+        
         right_split_condition = data_x[:,i]>split_val
-        print("right_split_condition",right_split_condition)
         right_tree = self.build_tree(data_x[right_split_condition], data_y[right_split_condition])
 
         root = np.array([i, split_val, 1, left_tree.shape[0]+1]).reshape((1, 4))
         concat_tree = np.concatenate([root, left_tree, right_tree], axis=0)
+
         return concat_tree
 
     def query(self, points):
@@ -69,7 +61,6 @@ class DTLearner(object):
         :return: The predicted result of the input data according to the trained model
         :rtype: numpy.ndarray
         """
-        print("points shape", points.shape, self.tree.shape)
         values = []
 
         for idx, point in enumerate(points):
@@ -77,21 +68,24 @@ class DTLearner(object):
             values.append(value)
 
         values = np.array(values)
+
+
         return values
     
     def query_point(self, point):
-        
         current_idx = 0
         ## keep going while the 
         node = self.tree[0]
         while node[0] != -1:
-            node = self.tree[current_idx]
-            i = node[0]
+            i = int(node[0])
             split_val = node[1]
             if point[i] <= split_val:
                 current_idx += node[2]
             else:
                 current_idx += node[3]
+
+            current_idx = int(current_idx)
+            node = self.tree[current_idx]
 
         return node[1]
 
