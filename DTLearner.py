@@ -1,7 +1,4 @@
 import numpy as np
-import pandas as pd
-import util 
-import random
 
 class DTLearner(object):
     def __init__(self, leaf_size: int, verbose=False):
@@ -12,6 +9,7 @@ class DTLearner(object):
         return "anandula3"
 
     def add_evidence(self, data_x, data_y):
+        # have to reshape to work with np.concatenate??
         data_y = data_y.reshape((len(data_y), 1))
         self.tree = self.build_tree(data_x, data_y)
 
@@ -28,8 +26,7 @@ class DTLearner(object):
             return return_leaf.reshape((1, 4))
         
         # determine best feature to split on
-        concat_data = np.concatenate([data_x, data_y], axis=1)
-        correlation = np.corrcoef(concat_data, rowvar=False)[-1,:-1]
+        correlation = np.corrcoef(data_x, data_y, rowvar=False)[-1,:-1]
         correlation = np.abs(correlation)
         i = np.argmax(correlation)
         split_val = np.median(data_x[:,i])
@@ -53,14 +50,6 @@ class DTLearner(object):
         return concat_tree
 
     def query(self, points):
-        """
-        Estimate a set of test points given the model we built.
-
-        :param points: A numpy array with each row corresponding to a specific query.
-        :type points: numpy.ndarray
-        :return: The predicted result of the input data according to the trained model
-        :rtype: numpy.ndarray
-        """
         values = []
 
         for idx, point in enumerate(points):
@@ -89,81 +78,8 @@ class DTLearner(object):
 
         return node[1]
 
-
 def test_code():
-    fake_seed = 1481090001
-    np.random.seed = fake_seed		  
-    random.seed = fake_seed	
-
-    datafile = "Istanbul.csv"
-    with util.get_learner_data_file(datafile) as f:		  
-        alldata = np.genfromtxt(f, delimiter=",")		  
-        # Skip the date column and header row if we're working on Istanbul data		  
-        if datafile == "Istanbul.csv":		  
-            alldata = alldata[1:, 1:]		  
-        datasize = alldata.shape[0]		  
-        cutoff = int(datasize * 0.6)		  
-        permutation = np.random.permutation(alldata.shape[0])		  
-        #col_permutation = np.random.permutation(alldata.shape[1] - 1)		  
-        train_data = alldata[permutation[:cutoff], :]		  
-        # train_x = train_data[:,:-1]		  
-        train_x = train_data		  
-        train_y = train_data[:, -1]		  
-        test_data = alldata[permutation[cutoff:], :]		  
-        # test_x = test_data[:,:-1]		  
-        test_x = test_data
-        test_y = test_data[:, -1]		  
-    
-    dtlearner = DTLearner(leaf_size=1)
-    dtlearner.add_evidence(train_x, train_y)
-
-    preds = dtlearner.query(train_x[:10])
-    print(preds, train_y[:10])
-
-
-
+    pass
 
 if __name__ == "__main__":
     test_code()
-    '''
-    arr = pd.read_csv("Data/simple.csv", header=None).to_numpy()
-    print("simple shape", arr.shape)
-    x = arr[:,:2]
-    y = arr[:,-1]
-    y = y.reshape((len(y), 1))
-
-    print(x[:5], x.shape)
-    print(y[:5], y.shape)
-
-    dtlearner = DTLearner(leaf_size=1)
-    dtlearner.add_evidence(x, y)
-
-
-    '''
-    '''
-    fake_seed = 1481090001
-    np.random.seed = fake_seed		  
-    random.seed = fake_seed	
-
-    datafile = "Istanbul.csv"
-    with util.get_learner_data_file(datafile) as f:		  
-        alldata = np.genfromtxt(f, delimiter=",")		  
-        # Skip the date column and header row if we're working on Istanbul data		  
-        if datafile == "Istanbul.csv":		  
-            alldata = alldata[1:, 1:]		  
-        datasize = alldata.shape[0]		  
-        cutoff = int(datasize * 0.6)		  
-        permutation = np.random.permutation(alldata.shape[0])		  
-        col_permutation = np.random.permutation(alldata.shape[1] - 1)		  
-        train_data = alldata[permutation[:cutoff], :]		  
-        # train_x = train_data[:,:-1]		  
-        train_x = train_data[:, col_permutation]		  
-        train_y = train_data[:, -1]		  
-        test_data = alldata[permutation[cutoff:], :]		  
-        # test_x = test_data[:,:-1]		  
-        test_x = test_data[:, col_permutation]		  
-        test_y = test_data[:, -1]		  
-        msgs = []
-
-    '''
-    pass
