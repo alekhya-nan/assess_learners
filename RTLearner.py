@@ -2,58 +2,88 @@ import numpy as np
 
 
 class RTLearner(object):
-    """
-    This is a Linear Regression Learner. It is implemented correctly.
-
-    :param verbose: If “verbose” is True, your code can print out information for debugging.
-        If verbose = False your code should not generate ANY output. When we test your code, verbose will be False.
-    :type verbose: bool
-    """
-    def __init__(self, verbose=False):
-        """
-        Constructor method
-        """
-        pass  # move along, these aren't the drones you're looking for
+    def __init__(self, leaf_size: int, verbose=False):
+        self.leaf_size = leaf_size
+        self.verbose = verbose
 
     def author(self):
-        """
-        :return: The GT username of the student
-        :rtype: str
-        """
-        return "tb34"  # replace tb34 with your Georgia Tech username
+        return "anandula3"
 
     def add_evidence(self, data_x, data_y):
-        """
-        Add training data to learner
+        # have to reshape to work with np.concatenate??
+        data_y = data_y.reshape((len(data_y), 1))
+        self.tree = self.build_tree(data_x, data_y)
 
-        :param data_x: A set of feature values used to train the learner
-        :type data_x: numpy.ndarray
-        :param data_y: The value we are attempting to predict given the X data
-        :type data_y: numpy.ndarray
-        """
+    def build_tree(self, data_x, data_y):
+        # if we're at a leaf node, then return 0
+        if data_x.shape[0] <= self.leaf_size:
+            leaf_pred = np.mean(data_y)
+            return_leaf = np.array([-1, leaf_pred, -1, -1])
+            return return_leaf.reshape((1, 4))
 
-        # slap on 1s column so linear regression finds a constant term
-        new_data_x = np.ones([data_x.shape[0], data_x.shape[1] + 1])
-        new_data_x[:, 0 : data_x.shape[1]] = data_x
+        # if all y values are the same (compare to the first item in the y column), then return leaf node
+        if np.allclose(data_y.flatten(), data_y[0][0], atol=0.000001):
+            return_leaf = np.array([-1, data_y[0][0], -1, -1])
+            return return_leaf.reshape((1, 4))
 
-        # build and save the model
-        self.model_coefs, residuals, rank, s = np.linalg.lstsq(
-            new_data_x, data_y, rcond=None
+        # determine best feature to split on: in RTLearner, it's random
+        i = np.random.randint(0, data_x.shape[1])
+        split_val = np.median(data_x[:, i])
+
+        # building the left tree
+        left_split_condition = data_x[:, i] <= split_val
+
+        if np.sum(left_split_condition) == len(left_split_condition):
+            leaf_pred = np.mean(data_y)
+            return_leaf = np.array([-1, leaf_pred, -1, -1])
+            return return_leaf.reshape((1, 4))
+
+        left_tree = self.build_tree(
+            data_x[left_split_condition], data_y[left_split_condition]
         )
 
-    def query(self, points):
-        """
-        Estimate a set of test points given the model we built.
+        right_split_condition = data_x[:, i] > split_val
+        right_tree = self.build_tree(
+            data_x[right_split_condition], data_y[right_split_condition]
+        )
 
-        :param points: A numpy array with each row corresponding to a specific query.
-        :type points: numpy.ndarray
-        :return: The predicted result of the input data according to the trained model
-        :rtype: numpy.ndarray
-        """
-        return (self.model_coefs[:-1] * points).sum(axis=1) + self.model_coefs[
-            -1
-        ]
+        root = np.array([i, split_val, 1, left_tree.shape[0] + 1]).reshape((1, 4))
+        concat_tree = np.concatenate([root, left_tree, right_tree], axis=0)
+
+        return concat_tree
+
+    def query(self, points):
+        values = []
+
+        for idx, point in enumerate(points):
+            value = self.query_point(point)
+            values.append(value)
+
+        values = np.array(values)
+
+        return values
+
+    def query_point(self, point):
+        current_idx = 0
+        ## keep going while the
+        node = self.tree[0]
+        while node[0] != -1:
+            i = int(node[0])
+            split_val = node[1]
+            if point[i] <= split_val:
+                current_idx += node[2]
+            else:
+                current_idx += node[3]
+
+            current_idx = int(current_idx)
+            node = self.tree[current_idx]
+
+        return node[1]
+
+
+def test_code():
+    pass
 
 
 if __name__ == "__main__":
-    print("the secret clue is 'zzyzx'")
+    test_code()

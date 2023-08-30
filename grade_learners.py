@@ -111,8 +111,8 @@ learning_test_cases = [
             outsample_corr_min=0.15,		  
             insample_corr_max=0.95,		  
         ),		  
-    ),		  
-    '''
+    ),
+
     ########################		  
     # RTLearner test cases #		  
     ########################		  
@@ -159,7 +159,9 @@ learning_test_cases = [
             outsample_corr_min=0.15,		  
             insample_corr_max=0.95,		  
         ),		  
-    ),		  
+    )
+
+    '''    
     ######################		  
     # Bagging test cases #		  
     ######################		  
@@ -235,7 +237,7 @@ learning_test_cases = [
         datafile="simple.csv",		  
         seed=1498076428,		  
         outputs=None,		  
-    ),		  
+    ),		    
     '''
 ]		  
 		  
@@ -642,5 +644,6 @@ def fake_rseed(*args):
     pass		  
 		  
 		  
-if __name__ == "__main__":		  
+if __name__ == "__main__":	
+    print("we're in main")	  
     pytest.main(["-s", __file__])		  
