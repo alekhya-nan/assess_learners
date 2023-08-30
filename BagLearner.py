@@ -3,10 +3,11 @@ import numpy as np
 
 class BagLearner(object):
     def __init__(self, learner, kwargs, bags, boost=False, verbose=False):
-        
+
         self.learners = [learner(**kwargs) for _ in range(bags)]
         self.boost = boost
         self.verbose = verbose
+
     def author(self):
         return "anandula3"
 
@@ -30,6 +31,7 @@ class BagLearner(object):
         bag_values = np.array(bag_values)
         values = bag_values.mean(axis=0)
         return values
+
 
 if __name__ == "__main__":
     print("the secret clue is 'zzyzx'")

@@ -2,11 +2,15 @@ from BagLearner import BagLearner
 from LinRegLearner import LinRegLearner
 import numpy as np
 
+
 class InsaneLearner(object):
     def __init__(self, verbose=False):
         self.num_bags = 20
         self.num_bag_learners = 20
-        self.learners = [BagLearner(LinRegLearner, {}, self.num_bags) for _ in range(self.num_bag_learners)]
+        self.learners = [
+            BagLearner(LinRegLearner, {}, self.num_bags)
+            for _ in range(self.num_bag_learners)
+        ]
 
     def author(self):
         return "anandula3"
