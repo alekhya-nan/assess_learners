@@ -159,9 +159,8 @@ learning_test_cases = [
             outsample_corr_min=0.15,		  
             insample_corr_max=0.95,		  
         ),		  
-    )
+    ),
 
-    '''    
     ######################		  
     # Bagging test cases #		  
     ######################		  
@@ -220,7 +219,9 @@ learning_test_cases = [
         datafile="Istanbul.csv",		  
         seed=1481090008,		  
         outputs=None,		  
-    ),		  
+    ),
+
+       '''      
     ##############################		  
     # RandomName + InsaneLearner #		  
     ##############################		  
@@ -239,6 +240,8 @@ learning_test_cases = [
         outputs=None,		  
     ),		    
     '''
+
+
 ]		  
 		  
 		  

@@ -21,18 +21,15 @@ class BagLearner(object):
             learner.add_evidence(learner_x, learner_y)
 
     def query(self, points):
-        """
-        Estimate a set of test points given the model we built.
+        bag_values = []
 
-        :param points: A numpy array with each row corresponding to a specific query.
-        :type points: numpy.ndarray
-        :return: The predicted result of the input data according to the trained model
-        :rtype: numpy.ndarray
-        """
-        return (self.model_coefs[:-1] * points).sum(axis=1) + self.model_coefs[
-            -1
-        ]
+        for learner in self.learners:
+            value = learner.query(points)
+            bag_values.append(value)
 
+        bag_values = np.array(bag_values)
+        values = bag_values.mean(axis=0)
+        return values
 
 if __name__ == "__main__":
     print("the secret clue is 'zzyzx'")
