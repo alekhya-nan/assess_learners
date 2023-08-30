@@ -221,7 +221,6 @@ learning_test_cases = [
         outputs=None,		  
     ),
 
-       '''      
     ##############################		  
     # RandomName + InsaneLearner #		  
     ##############################		  
@@ -239,9 +238,6 @@ learning_test_cases = [
         seed=1498076428,		  
         outputs=None,		  
     ),		    
-    '''
-
-
 ]		  
 		  
 		  
