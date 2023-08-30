@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import util 
+import random
 
 class DTLearner(object):
     def __init__(self, leaf_size: int, verbose=False):
@@ -10,18 +12,20 @@ class DTLearner(object):
         return "anandula3"
 
     def add_evidence(self, data_x, data_y):
+        data_y = data_y.reshape((len(data_y), 1))
         self.tree = self.build_tree(data_x, data_y)
 
     def build_tree(self, data_x, data_y):
         # if we're at a leaf node, then return 0
-        assert data_x.shape[1] == 2
-        assert data_y.shape[1] == 1
+        print("data", data_x.shape, data_y.shape)
         if data_x.shape[0] <= self.leaf_size:
+            print("in returning leaf size...")
             leaf_pred = np.mean(data_y)
             return_leaf = np.array([-1, leaf_pred, -1, -1])
             return return_leaf.reshape((1, 4))
         # if all y values are the same (compare to the first item in the y column), then return leaf node
         if np.all(data_y == data_y[0], axis = 0):
+            print("returning if all y is same")
             return_leaf = np.array([-1, data_y[0][0], -1, -1])
             return return_leaf.reshape((1, 4))
         
@@ -31,14 +35,25 @@ class DTLearner(object):
         correlation = np.abs(correlation)
         i = np.argmax(correlation)
 
+        print("concat_data", concat_data.shape, correlation.shape, i)
         # splitting value
         split_val = np.median(data_x[:,i])
 
+        print("concat_data", concat_data.shape, correlation.shape, i, data_x[:,i], split_val)
+        print(data_x, data_y)
         # building the left tree
         left_split_condition = data_x[:,i]<=split_val
+
+        if np.sum(left_split_condition) == len(left_split_condition):
+            leaf_pred = np.mean(data_y)
+            return_leaf = np.array([-1, leaf_pred, -1, -1])
+            return return_leaf.reshape((1, 4))
+        
+        print("left_split_condition",left_split_condition)
         left_tree = self.build_tree(data_x[left_split_condition], data_y[left_split_condition])
         # building the right tree
         right_split_condition = data_x[:,i]>split_val
+        print("right_split_condition",right_split_condition)
         right_tree = self.build_tree(data_x[right_split_condition], data_y[right_split_condition])
 
         root = np.array([i, split_val, 1, left_tree.shape[0]+1]).reshape((1, 4))
@@ -54,6 +69,7 @@ class DTLearner(object):
         :return: The predicted result of the input data according to the trained model
         :rtype: numpy.ndarray
         """
+        print("points shape", points.shape, self.tree.shape)
         values = []
 
         for idx, point in enumerate(points):
@@ -67,6 +83,7 @@ class DTLearner(object):
         
         current_idx = 0
         ## keep going while the 
+        node = self.tree[0]
         while node[0] != -1:
             node = self.tree[current_idx]
             i = node[0]
@@ -79,7 +96,42 @@ class DTLearner(object):
         return node[1]
 
 
+def test_code():
+    fake_seed = 1481090001
+    np.random.seed = fake_seed		  
+    random.seed = fake_seed	
+
+    datafile = "Istanbul.csv"
+    with util.get_learner_data_file(datafile) as f:		  
+        alldata = np.genfromtxt(f, delimiter=",")		  
+        # Skip the date column and header row if we're working on Istanbul data		  
+        if datafile == "Istanbul.csv":		  
+            alldata = alldata[1:, 1:]		  
+        datasize = alldata.shape[0]		  
+        cutoff = int(datasize * 0.6)		  
+        permutation = np.random.permutation(alldata.shape[0])		  
+        #col_permutation = np.random.permutation(alldata.shape[1] - 1)		  
+        train_data = alldata[permutation[:cutoff], :]		  
+        # train_x = train_data[:,:-1]		  
+        train_x = train_data		  
+        train_y = train_data[:, -1]		  
+        test_data = alldata[permutation[cutoff:], :]		  
+        # test_x = test_data[:,:-1]		  
+        test_x = test_data
+        test_y = test_data[:, -1]		  
+    
+    dtlearner = DTLearner(leaf_size=1)
+    dtlearner.add_evidence(train_x, train_y)
+
+    preds = dtlearner.query(train_x[:10])
+    print(preds, train_y[:10])
+
+
+
+
 if __name__ == "__main__":
+    test_code()
+    '''
     arr = pd.read_csv("Data/simple.csv", header=None).to_numpy()
     print("simple shape", arr.shape)
     x = arr[:,:2]
@@ -91,3 +143,33 @@ if __name__ == "__main__":
 
     dtlearner = DTLearner(leaf_size=1)
     dtlearner.add_evidence(x, y)
+
+
+    '''
+    '''
+    fake_seed = 1481090001
+    np.random.seed = fake_seed		  
+    random.seed = fake_seed	
+
+    datafile = "Istanbul.csv"
+    with util.get_learner_data_file(datafile) as f:		  
+        alldata = np.genfromtxt(f, delimiter=",")		  
+        # Skip the date column and header row if we're working on Istanbul data		  
+        if datafile == "Istanbul.csv":		  
+            alldata = alldata[1:, 1:]		  
+        datasize = alldata.shape[0]		  
+        cutoff = int(datasize * 0.6)		  
+        permutation = np.random.permutation(alldata.shape[0])		  
+        col_permutation = np.random.permutation(alldata.shape[1] - 1)		  
+        train_data = alldata[permutation[:cutoff], :]		  
+        # train_x = train_data[:,:-1]		  
+        train_x = train_data[:, col_permutation]		  
+        train_y = train_data[:, -1]		  
+        test_data = alldata[permutation[cutoff:], :]		  
+        # test_x = test_data[:,:-1]		  
+        test_x = test_data[:, col_permutation]		  
+        test_y = test_data[:, -1]		  
+        msgs = []
+
+    '''
+    pass
