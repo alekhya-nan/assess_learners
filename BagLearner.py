@@ -2,44 +2,23 @@ import numpy as np
 
 
 class BagLearner(object):
-    """
-    This is a Linear Regression Learner. It is implemented correctly.
-
-    :param verbose: If “verbose” is True, your code can print out information for debugging.
-        If verbose = False your code should not generate ANY output. When we test your code, verbose will be False.
-    :type verbose: bool
-    """
-    def __init__(self, verbose=False):
-        """
-        Constructor method
-        """
-        pass  # move along, these aren't the drones you're looking for
-
+    def __init__(self, learner, kwargs, bags, boost=False, verbose=False):
+        
+        self.learners = [learner(**kwargs) for _ in range(bags)]
+        self.boost = boost
+        self.verbose = verbose
     def author(self):
-        """
-        :return: The GT username of the student
-        :rtype: str
-        """
-        return "tb34"  # replace tb34 with your Georgia Tech username
+        return "anandula3"
 
     def add_evidence(self, data_x, data_y):
-        """
-        Add training data to learner
+        num_rows = data_x.shape[0]
 
-        :param data_x: A set of feature values used to train the learner
-        :type data_x: numpy.ndarray
-        :param data_y: The value we are attempting to predict given the X data
-        :type data_y: numpy.ndarray
-        """
+        for learner in self.learners:
+            learner_idxs = np.random.choice(num_rows, num_rows)
+            learner_x = data_x[learner_idxs]
+            learner_y = data_y[learner_idxs]
 
-        # slap on 1s column so linear regression finds a constant term
-        new_data_x = np.ones([data_x.shape[0], data_x.shape[1] + 1])
-        new_data_x[:, 0 : data_x.shape[1]] = data_x
-
-        # build and save the model
-        self.model_coefs, residuals, rank, s = np.linalg.lstsq(
-            new_data_x, data_y, rcond=None
-        )
+            learner.add_evidence(learner_x, learner_y)
 
     def query(self, points):
         """
