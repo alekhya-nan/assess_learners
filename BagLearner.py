@@ -31,7 +31,3 @@ class BagLearner(object):
         bag_values = np.array(bag_values)
         values = bag_values.mean(axis=0)
         return values
-
-
-if __name__ == "__main__":
-    print("the secret clue is 'zzyzx'")

@@ -81,11 +81,3 @@ class DTLearner(object):
             node = self.tree[current_idx]
 
         return node[1]
-
-
-def test_code():
-    pass
-
-
-if __name__ == "__main__":
-    test_code()
