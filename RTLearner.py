@@ -2,7 +2,7 @@ import numpy as np
 
 
 class RTLearner(object):
-    def __init__(self, leaf_size: int, verbose=False):
+    def __init__(self, leaf_size: int, verbose: bool =False):
         self.leaf_size = leaf_size
         self.verbose = verbose
 
@@ -22,6 +22,7 @@ class RTLearner(object):
             return return_leaf.reshape((1, 4))
 
         # if all y values are the same (compare to the first item in the y column), then return leaf node
+        # can't use simple equality check bc these are floats
         if np.allclose(data_y.flatten(), data_y[0][0], atol=0.000001):
             return_leaf = np.array([-1, data_y[0][0], -1, -1])
             return return_leaf.reshape((1, 4))
@@ -33,6 +34,7 @@ class RTLearner(object):
         # building the left tree
         left_split_condition = data_x[:, i] <= split_val
 
+        # if all the feature i vals are the same, then return a leaf node (causes infinite recursion otherwise: see https://edstem.org/us/courses/43166/discussion/3357228)
         if np.sum(left_split_condition) == len(left_split_condition):
             leaf_pred = np.mean(data_y)
             return_leaf = np.array([-1, leaf_pred, -1, -1])
@@ -53,19 +55,19 @@ class RTLearner(object):
         return concat_tree
 
     def query(self, points):
-        values = []
+        preds = []
 
         for idx, point in enumerate(points):
-            value = self.query_point(point)
-            values.append(value)
+            pred = self.query_point(point)
+            preds.append(pred)
 
-        values = np.array(values)
+        preds = np.array(preds)
 
-        return values
+        return preds
 
     def query_point(self, point):
         current_idx = 0
-        ## keep going while the
+        ## keep going while the current node is not leaf node
         node = self.tree[0]
         while node[0] != -1:
             i = int(node[0])

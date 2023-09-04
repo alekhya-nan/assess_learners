@@ -15,19 +15,20 @@ class BagLearner(object):
         num_rows = data_x.shape[0]
 
         for learner in self.learners:
-            learner_idxs = np.random.choice(num_rows, num_rows)
+            learner_idxs = np.random.choice(a=num_rows, size=num_rows)
             learner_x = data_x[learner_idxs]
             learner_y = data_y[learner_idxs]
 
             learner.add_evidence(learner_x, learner_y)
 
     def query(self, points):
-        bag_values = []
+        bag_preds = []
 
         for learner in self.learners:
-            value = learner.query(points)
-            bag_values.append(value)
+            pred = learner.query(points)
+            bag_preds.append(pred)
 
-        bag_values = np.array(bag_values)
-        values = bag_values.mean(axis=0)
-        return values
+        bag_preds = np.array(bag_preds)
+        preds = bag_preds.mean(axis=0)
+        assert len(preds) == len(points)
+        return preds
