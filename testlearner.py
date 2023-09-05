@@ -25,19 +25,19 @@ GT honor code violation.
 
 import math
 import sys
+import time
 
 import numpy as np
 from matplotlib import pyplot as plt
-from DTLearner import DTLearner
+
 from BagLearner import BagLearner
+from DTLearner import DTLearner
 from RTLearner import RTLearner
-import time
 
 
 def get_RMSE(pred_y, test_y):
     rmse = math.sqrt(((test_y - pred_y) ** 2).sum() / test_y.shape[0])
     return rmse
-
 
 def get_RSquared(pred_y, test_y):
     correlation = np.corrcoef(pred_y, test_y)[0, 1]
