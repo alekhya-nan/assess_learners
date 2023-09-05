@@ -2,7 +2,7 @@ import numpy as np
 
 
 class DTLearner(object):
-    def __init__(self, leaf_size: int, verbose: bool =False):
+    def __init__(self, leaf_size: int, verbose: bool = False):
         self.leaf_size = leaf_size
         self.verbose = verbose
 

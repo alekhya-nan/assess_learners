@@ -33,24 +33,26 @@ from BagLearner import BagLearner
 from RTLearner import RTLearner
 import time
 
+
 def get_RMSE(pred_y, test_y):
     rmse = math.sqrt(((test_y - pred_y) ** 2).sum() / test_y.shape[0])
-
     return rmse
 
+
 def get_RSquared(pred_y, test_y):
-    correlation = np.corrcoef(pred_y, test_y)[0,1]
+    correlation = np.corrcoef(pred_y, test_y)[0, 1]
     return correlation**2
+
 
 def experiment_1(train_x, train_y, test_x, test_y):
     leaf_sizes = [i for i in range(1, 51)]
-    train_rmses =  []
+    train_rmses = []
     test_rmses = []
 
     for leaf_size in leaf_sizes:
         learner = DTLearner(leaf_size)
         learner.add_evidence(train_x, train_y)
-        
+
         # train_rmses
         pred_train_y = learner.query(train_x)
         train_rmse = get_RMSE(pred_train_y, train_y)
@@ -65,27 +67,29 @@ def experiment_1(train_x, train_y, test_x, test_y):
     test_rmses = np.array(test_rmses)
     rmses = np.array([train_rmses, test_rmses])
 
-    legend = ['in sample', 'out of sample']
+    legend = ["in sample", "out of sample"]
     plt.clf()
     plt.plot(rmses.T)
     plt.legend(legend)
-    plt.xlabel('leaf size')
-    plt.ylabel('RMSE')
-    plt.title('Experiment 1: Overfitting wrt leaf size in DTLearner')
+    plt.xlabel("leaf size")
+    plt.ylabel("RMSE")
+    plt.title("Experiment 1: Overfitting wrt leaf size in DTLearner")
     plt.grid(visible=True)
-    plt.savefig('images/experiment_1.png')
+    plt.savefig("images/experiment_1.png")
 
 
 def experiment_2(train_x, train_y, test_x, test_y):
     leaf_sizes = [i for i in range(1, 51)]
     num_bags = 20
-    train_rmses =  []
+    train_rmses = []
     test_rmses = []
 
     for leaf_size in leaf_sizes:
-        learner = BagLearner(learner=DTLearner, kwargs={'leaf_size': leaf_size}, bags=num_bags)
+        learner = BagLearner(
+            learner=DTLearner, kwargs={"leaf_size": leaf_size}, bags=num_bags
+        )
         learner.add_evidence(train_x, train_y)
-        
+
         # train_rmses
         pred_train_y = learner.query(train_x)
         train_rmse = get_RMSE(pred_train_y, train_y)
@@ -99,40 +103,38 @@ def experiment_2(train_x, train_y, test_x, test_y):
     train_rmses = np.array(train_rmses)
     test_rmses = np.array(test_rmses)
     rmses = np.array([train_rmses, test_rmses])
-    legend = ['in sample', 'out of sample']
+    legend = ["in sample", "out of sample"]
 
     plt.clf()
     plt.plot(rmses.T)
     plt.legend(legend)
-    plt.xlabel('leaf size')
-    plt.ylabel('RMSE')
-    plt.title(f'Experiment 2: \nOverfitting wrt leaf size in BagLearner (#bags = {num_bags})')
+    plt.xlabel("leaf size")
+    plt.ylabel("RMSE")
+    plt.title(
+        f"Experiment 2: \nOverfitting wrt leaf size in BagLearner (#bags = {num_bags})"
+    )
     plt.grid(visible=True)
-    plt.savefig('images/experiment_2.png')
+    plt.savefig("images/experiment_2.png")
+
 
 def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
     leaf_sizes = [i for i in range(1, 51)]
-    rmses = {
-        'DT_train_r2': [],
-        'DT_test_r2': [],
-        'RT_train_r2': [],
-        'RT_test_r2': []
-    }
+    rmses = {"DT_train_r2": [], "DT_test_r2": [], "RT_train_r2": [], "RT_test_r2": []}
 
     for leaf_size in leaf_sizes:
         # get DTLearner metrics
         dt_learner = DTLearner(leaf_size)
         dt_learner.add_evidence(train_x, train_y)
-        
+
         # train_r2s
         pred_train_y = dt_learner.query(train_x)
         train_r2 = get_RSquared(pred_train_y, train_y)
-        rmses['DT_train_r2'].append(train_r2)
+        rmses["DT_train_r2"].append(train_r2)
 
         # test r2s
         pred_test_y = dt_learner.query(test_x)
         test_r2 = get_RSquared(pred_test_y, test_y)
-        rmses['DT_test_r2'].append(test_r2)
+        rmses["DT_test_r2"].append(test_r2)
 
         # get RTLearner metrics
         rt_learner = RTLearner(leaf_size)
@@ -141,36 +143,41 @@ def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
         # train_r2s
         pred_train_y = rt_learner.query(train_x)
         train_r2 = get_RSquared(pred_train_y, train_y)
-        rmses['RT_train_r2'].append(train_r2)
+        rmses["RT_train_r2"].append(train_r2)
 
         # test r2s
         pred_test_y = rt_learner.query(test_x)
         test_r2 = get_RSquared(pred_test_y, test_y)
-        rmses['RT_test_r2'].append(test_r2)
-    
-    in_sample_data = np.array([rmses['DT_train_r2'], rmses['RT_train_r2']])
-    legend = ['DTLearner', 'RTLearner']
-    out_sample_data = np.array([rmses['DT_test_r2'], rmses['RT_test_r2']])
-    
+        rmses["RT_test_r2"].append(test_r2)
+
+    in_sample_data = np.array([rmses["DT_train_r2"], rmses["RT_train_r2"]])
+    legend = ["DTLearner", "RTLearner"]
+    out_sample_data = np.array([rmses["DT_test_r2"], rmses["RT_test_r2"]])
+
     # plot in-sample results
     plt.clf()
     plt.plot(in_sample_data.T)
     plt.legend(legend)
-    plt.xlabel('leaf size')
-    plt.ylabel('R^2')
-    plt.title(f'Experiment 3, Metric 1 \nDTLearner vs RTLearner using R-Squared (in-sample)')
+    plt.xlabel("leaf size")
+    plt.ylabel("R^2")
+    plt.title(
+        f"Experiment 3, Metric 1 \nDTLearner vs RTLearner using R-Squared (in-sample)"
+    )
     plt.grid(visible=True)
-    plt.savefig('images/experiment_3_metric_1_insample.png')
+    plt.savefig("images/experiment_3_metric_1_insample.png")
 
     # plot out-of-sample results
     plt.clf()
     plt.plot(out_sample_data.T)
     plt.legend(legend)
-    plt.xlabel('leaf size')
-    plt.ylabel('R^2')
-    plt.title(f'Experiment 3, Metric 1 \nDTLearner vs RTLearner using R-Squared (out-of-sample)')
+    plt.xlabel("leaf size")
+    plt.ylabel("R^2")
+    plt.title(
+        f"Experiment 3, Metric 1 \nDTLearner vs RTLearner using R-Squared (out-of-sample)"
+    )
     plt.grid(visible=True)
-    plt.savefig('images/experiment_3_metric_1_outsample.png')
+    plt.savefig("images/experiment_3_metric_1_outsample.png")
+
 
 def experiment_3_metric_2_traintime(train_x, train_y, test_x, test_y):
     dataset_sizes = [i for i in range(10, len(train_x), 25)]
@@ -178,7 +185,7 @@ def experiment_3_metric_2_traintime(train_x, train_y, test_x, test_y):
     dt_learner_train_times = []
     rt_learner_train_times = []
     print(len(train_x))
-    
+
     for dataset_size in dataset_sizes:
         # get DTLearner metrics
         dt_learner = DTLearner(leaf_size=leaf_size)
@@ -199,17 +206,18 @@ def experiment_3_metric_2_traintime(train_x, train_y, test_x, test_y):
 
     # plot runtime
     runtimes = np.array([dt_learner_train_times, rt_learner_train_times])
-    legend = ['DTLearner runtime', 'RTLearner runtime']
+    legend = ["DTLearner runtime", "RTLearner runtime"]
 
     plt.clf()
     plt.plot(runtimes.T)
     plt.legend(legend)
     plt.xticks([i for i in range(len(dataset_sizes))], labels=dataset_sizes)
-    plt.xlabel('dataset size')
-    plt.ylabel('time to train (s)')
-    plt.title(f'Experiment 3, Metric 2 \nDTLearner vs RTLearner Training Time')
+    plt.xlabel("dataset size")
+    plt.ylabel("time to train (s)")
+    plt.title(f"Experiment 3, Metric 2 \nDTLearner vs RTLearner Training Time")
     plt.grid(visible=True)
-    plt.savefig('images/experiment_3_metric_2.png')
+    plt.savefig("images/experiment_3_metric_2.png")
+
 
 if __name__ == "__main__":
     np.random.seed(903458910)
@@ -237,10 +245,10 @@ if __name__ == "__main__":
     test_y = data[train_rows:, -1]
 
     # run experiment 1
-    #experiment_1(train_x, train_y, test_x, test_y)
+    # experiment_1(train_x, train_y, test_x, test_y)
 
     # run experiment 2
-    #experiment_2(train_x, train_y, test_x, test_y)
+    # experiment_2(train_x, train_y, test_x, test_y)
 
     # run experiment 3, metric 1
     experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y)
