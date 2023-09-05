@@ -84,7 +84,7 @@ def experiment_1(train_x, train_y, test_x, test_y):
     ylabel = "RMSE"
     title = "Experiment 1: Overfitting wrt leaf size in DTLearner"
     save_path = "images/experiment_1.png"
-    plot_data(rmses.T, legend, xlabel, ylabel, title, save_path)
+    plot_data(rmses, legend, xlabel, ylabel, title, save_path)
 
 
 def experiment_2(train_x, train_y, test_x, test_y):
@@ -117,7 +117,7 @@ def experiment_2(train_x, train_y, test_x, test_y):
     ylabel = "RMSE"
     title = f"Experiment 2: \nOverfitting wrt leaf size in BagLearner (#bags = {num_bags})"
     save_path = "images/experiment_2.png"
-    plot_data(rmses.T, legend, xlabel, ylabel, title, save_path)
+    plot_data(rmses, legend, xlabel, ylabel, title, save_path)
 
 
 def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
@@ -162,12 +162,12 @@ def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
     # plot in-sample results
     title = f"Experiment 3, Metric 1 \nDTLearner vs RTLearner using R-Squared (in-sample)"
     save_path = "images/experiment_3_metric_1_insample.png"
-    plot_data(in_sample_data.T, legend, xlabel, ylabel, title, save_path)
+    plot_data(in_sample_data, legend, xlabel, ylabel, title, save_path)
 
     # plot out-of-sample results
     title = f"Experiment 3, Metric 1 \nDTLearner vs RTLearner using R-Squared (out-of-sample)"
     save_path = "images/experiment_3_metric_1_outsample.png"
-    plot_data(out_sample_data.T, legend, xlabel, ylabel, title, save_path)
+    plot_data(out_sample_data, legend, xlabel, ylabel, title, save_path)
 
 
 def experiment_3_metric_2_traintime(train_x, train_y, test_x, test_y):
@@ -202,7 +202,7 @@ def experiment_3_metric_2_traintime(train_x, train_y, test_x, test_y):
     ylabel = "time to train (s)"
     title = f"Experiment 3, Metric 2 \nDTLearner vs RTLearner Training Time"
     save_path = "images/experiment_3_metric_2.png"
-    plot_data(runtimes.T, legend, xlabel, ylabel, title, save_path, xticks=dataset_sizes)
+    plot_data(runtimes, legend, xlabel, ylabel, title, save_path, xticks=dataset_sizes)
 
 
 if __name__ == "__main__":
