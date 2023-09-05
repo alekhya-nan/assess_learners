@@ -30,13 +30,17 @@ import numpy as np
 from matplotlib import pyplot as plt
 from DTLearner import DTLearner
 from BagLearner import BagLearner
+from RTLearner import RTLearner
 
 def get_RMSE(pred_y, test_y):
     rmse = math.sqrt(((test_y - pred_y) ** 2).sum() / test_y.shape[0])
 
     return rmse
 
+def get_MAE(pred_y, test_y):
+    mae = (np.abs(test_y - pred_y)).sum() / test_y.shape[0]
 
+    return mae
 
 def experiment_1(train_x, train_y, test_x, test_y):
     leaf_sizes = [i for i in range(1, 51)]
@@ -61,9 +65,10 @@ def experiment_1(train_x, train_y, test_x, test_y):
     test_rmses = np.array(test_rmses)
     rmses = np.array([train_rmses, test_rmses])
 
+    legend = ['in sample', 'out of sample']
     plt.clf()
     plt.plot(rmses.T)
-    plt.legend(['in sample', 'out of sample'])
+    plt.legend(legend)
     plt.xlabel('leaf size')
     plt.ylabel('RMSE')
     plt.title('Experiment 1: Overfitting wrt leaf size in DTLearner')
@@ -94,17 +99,78 @@ def experiment_2(train_x, train_y, test_x, test_y):
     train_rmses = np.array(train_rmses)
     test_rmses = np.array(test_rmses)
     rmses = np.array([train_rmses, test_rmses])
+    legend = ['in sample', 'out of sample']
 
     plt.clf()
     plt.plot(rmses.T)
-    plt.legend(['in sample', 'out of sample'])
+    plt.legend(legend)
     plt.xlabel('leaf size')
     plt.ylabel('RMSE')
     plt.title(f'Experiment 2: \nOverfitting wrt leaf size in BagLearner (#bags = {num_bags})')
     plt.grid(visible=True)
     plt.savefig('images/experiment_2.png')
 
+def experiment_3_metric_1_MAE(train_x, train_y, test_x, test_y):
+    leaf_sizes = [i for i in range(1, 51)]
+    rmses = {
+        'DT_train_mae': [],
+        'DT_test_mae': [],
+        'RT_train_mae': [],
+        'RT_test_mae': []
+    }
 
+    for leaf_size in leaf_sizes:
+        # get DTLearner metrics
+        dt_learner = DTLearner(leaf_size)
+        dt_learner.add_evidence(train_x, train_y)
+        
+        # train_maes
+        pred_train_y = dt_learner.query(train_x)
+        train_mae = get_MAE(pred_train_y, train_y)
+        rmses['DT_train_mae'].append(train_mae)
+
+        # test maes
+        pred_test_y = dt_learner.query(test_x)
+        test_mae = get_MAE(pred_test_y, test_y)
+        rmses['DT_test_mae'].append(test_mae)
+
+        # get RTLearner metrics
+        rt_learner = RTLearner(leaf_size)
+        rt_learner.add_evidence(train_x, train_y)
+
+        # train_maes
+        pred_train_y = rt_learner.query(train_x)
+        train_mae = get_MAE(pred_train_y, train_y)
+        rmses['RT_train_mae'].append(train_mae)
+
+        # test maes
+        pred_test_y = rt_learner.query(test_x)
+        test_mae = get_MAE(pred_test_y, test_y)
+        rmses['RT_test_mae'].append(test_mae)
+    
+    # plot in-sample results
+    plt.clf()
+    in_sample_data = np.array([rmses['DT_train_mae'], rmses['RT_train_mae']])
+    legend = ['DTLearner', 'RTLearner']
+    plt.plot(in_sample_data.T)
+    plt.legend(legend)
+    plt.xlabel('leaf size')
+    plt.ylabel('MAE')
+    plt.title(f'Experiment 3, Metric 1 \nDTLearner vs RTLearner using Mean Absolute Error (in-sample)')
+    plt.grid(visible=True)
+    plt.savefig('images/experiment_3_metric_1_insample.png')
+
+    # plot out-of-sample results
+    plt.clf()
+    out_sample_data = np.array([rmses['DT_test_mae'], rmses['RT_test_mae']])
+    legend = ['DTLearner', 'RTLearner']
+    plt.plot(out_sample_data.T)
+    plt.legend(legend)
+    plt.xlabel('leaf size')
+    plt.ylabel('MAE')
+    plt.title(f'Experiment 3, Metric 1 \nDTLearner vs RTLearner using Mean Absolute Error (out-of-sample)')
+    plt.grid(visible=True)
+    plt.savefig('images/experiment_3_metric_1_outsample.png')
 
 
 if __name__ == "__main__":
@@ -136,4 +202,7 @@ if __name__ == "__main__":
     experiment_1(train_x, train_y, test_x, test_y)
 
     # run experiment 2
-    experiment_2(train_x, train_y, test_x, test_y)
+    #experiment_2(train_x, train_y, test_x, test_y)
+
+    # run experiment 3, metric 1
+    experiment_3_metric_1_MAE(train_x, train_y, test_x, test_y)
