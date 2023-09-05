@@ -29,6 +29,7 @@ import sys
 import numpy as np
 from matplotlib import pyplot as plt
 from DTLearner import DTLearner
+from BagLearner import BagLearner
 
 def get_RMSE(pred_y, test_y):
     rmse = math.sqrt(((test_y - pred_y) ** 2).sum() / test_y.shape[0])
@@ -56,6 +57,8 @@ def experiment_1(train_x, train_y, test_x, test_y):
         test_rmse = get_RMSE(pred_test_y, test_y)
         test_rmses.append(test_rmse)
 
+    train_rmses = np.array(train_rmses)
+    test_rmses = np.array(test_rmses)
     rmses = np.array([train_rmses, test_rmses])
 
     plt.clf()
@@ -66,6 +69,42 @@ def experiment_1(train_x, train_y, test_x, test_y):
     plt.title('Experiment 1: Overfitting wrt leaf size in DTLearner')
     plt.grid(visible=True)
     plt.savefig('images/experiment_1.png')
+
+
+def experiment_2(train_x, train_y, test_x, test_y):
+    leaf_sizes = [i for i in range(1, 51)]
+    num_bags = 20
+    train_rmses =  []
+    test_rmses = []
+
+    for leaf_size in leaf_sizes:
+        learner = BagLearner(learner=DTLearner, kwargs={'leaf_size': leaf_size}, bags=num_bags)
+        learner.add_evidence(train_x, train_y)
+        
+        # train_rmses
+        pred_train_y = learner.query(train_x)
+        train_rmse = get_RMSE(pred_train_y, train_y)
+        train_rmses.append(train_rmse)
+
+        # test rmses
+        pred_test_y = learner.query(test_x)
+        test_rmse = get_RMSE(pred_test_y, test_y)
+        test_rmses.append(test_rmse)
+
+    train_rmses = np.array(train_rmses)
+    test_rmses = np.array(test_rmses)
+    rmses = np.array([train_rmses, test_rmses])
+
+    plt.clf()
+    plt.plot(rmses.T)
+    plt.legend(['in sample', 'out of sample'])
+    plt.xlabel('leaf size')
+    plt.ylabel('RMSE')
+    plt.title(f'Experiment 2: \nOverfitting wrt leaf size in BagLearner (#bags = {num_bags})')
+    plt.grid(visible=True)
+    plt.savefig('images/experiment_2.png')
+
+
 
 
 if __name__ == "__main__":
@@ -95,3 +134,6 @@ if __name__ == "__main__":
 
     # run experiment 1
     experiment_1(train_x, train_y, test_x, test_y)
+
+    # run experiment 2
+    experiment_2(train_x, train_y, test_x, test_y)
