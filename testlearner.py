@@ -31,6 +31,7 @@ from matplotlib import pyplot as plt
 from DTLearner import DTLearner
 from BagLearner import BagLearner
 from RTLearner import RTLearner
+import time
 
 def get_RMSE(pred_y, test_y):
     rmse = math.sqrt(((test_y - pred_y) ** 2).sum() / test_y.shape[0])
@@ -148,10 +149,12 @@ def experiment_3_metric_1_MAE(train_x, train_y, test_x, test_y):
         test_mae = get_MAE(pred_test_y, test_y)
         rmses['RT_test_mae'].append(test_mae)
     
-    # plot in-sample results
-    plt.clf()
     in_sample_data = np.array([rmses['DT_train_mae'], rmses['RT_train_mae']])
     legend = ['DTLearner', 'RTLearner']
+    out_sample_data = np.array([rmses['DT_test_mae'], rmses['RT_test_mae']])
+    
+    # plot in-sample results
+    plt.clf()
     plt.plot(in_sample_data.T)
     plt.legend(legend)
     plt.xlabel('leaf size')
@@ -162,8 +165,6 @@ def experiment_3_metric_1_MAE(train_x, train_y, test_x, test_y):
 
     # plot out-of-sample results
     plt.clf()
-    out_sample_data = np.array([rmses['DT_test_mae'], rmses['RT_test_mae']])
-    legend = ['DTLearner', 'RTLearner']
     plt.plot(out_sample_data.T)
     plt.legend(legend)
     plt.xlabel('leaf size')
@@ -172,6 +173,44 @@ def experiment_3_metric_1_MAE(train_x, train_y, test_x, test_y):
     plt.grid(visible=True)
     plt.savefig('images/experiment_3_metric_1_outsample.png')
 
+def experiment_3_metric_2_traintime(train_x, train_y, test_x, test_y):
+    dataset_sizes = [i for i in range(10, len(train_x), 25)]
+    leaf_size = 1
+    dt_learner_train_times = []
+    rt_learner_train_times = []
+    print(len(train_x))
+    
+    for dataset_size in dataset_sizes:
+        # get DTLearner metrics
+        dt_learner = DTLearner(leaf_size=leaf_size)
+        train_x_subset = train_x[:dataset_size]
+        train_y_subset = train_y[:dataset_size]
+
+        start = time.time()
+        dt_learner.add_evidence(train_x_subset, train_y_subset)
+        train_time = time.time() - start
+        dt_learner_train_times.append(train_time)
+
+        # get RTLearner metrics
+        rt_learner = RTLearner(leaf_size=leaf_size)
+        start = time.time()
+        rt_learner.add_evidence(train_x_subset, train_y_subset)
+        train_time = time.time() - start
+        rt_learner_train_times.append(train_time)
+
+    # plot runtime
+    runtimes = np.array([dt_learner_train_times, rt_learner_train_times])
+    legend = ['DTLearner runtime', 'RTLearner runtime']
+
+    plt.clf()
+    plt.plot(runtimes.T)
+    plt.legend(legend)
+    plt.xticks([i for i in range(len(dataset_sizes))], labels=dataset_sizes)
+    plt.xlabel('dataset size')
+    plt.ylabel('time to train (s)')
+    plt.title(f'Experiment 3, Metric 2 \nDTLearner vs RTLearner Training Time')
+    plt.grid(visible=True)
+    plt.savefig('images/experiment_3_metric_2.png')
 
 if __name__ == "__main__":
     np.random.seed(903458910)
@@ -199,10 +238,13 @@ if __name__ == "__main__":
     test_y = data[train_rows:, -1]
 
     # run experiment 1
-    experiment_1(train_x, train_y, test_x, test_y)
+    #experiment_1(train_x, train_y, test_x, test_y)
 
     # run experiment 2
     #experiment_2(train_x, train_y, test_x, test_y)
 
     # run experiment 3, metric 1
-    experiment_3_metric_1_MAE(train_x, train_y, test_x, test_y)
+    #experiment_3_metric_1_MAE(train_x, train_y, test_x, test_y)
+
+    # run experiment 3, metric 2
+    experiment_3_metric_2_traintime(train_x, train_y, test_x, test_y)
