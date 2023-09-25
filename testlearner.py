@@ -50,12 +50,14 @@ def get_RSquared(pred_y, y):
     return r2
 
 
-def plot_data(data, legend, xlabel, ylabel, title, filename, xticks=None):
+def plot_data(data, legend, xlabel, ylabel, title, filename, xticklabels):
     plt.clf()
+    fig, ax = plt.subplots()
     plt.plot(data.T)
     plt.legend(legend, loc="lower right")
-    if xticks:
-        plt.xticks([i for i in range(len(xticks))], labels=xticks)
+    # if xticks:
+    #    plt.xticks([i for i in range(len(xticks))], labels=xticks)
+    ax.set_xticklabels(xticklabels)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
@@ -85,6 +87,7 @@ def experiment_1(train_x, train_y, test_x, test_y):
 
     train_rmses = np.array(train_rmses)
     test_rmses = np.array(test_rmses)
+
     rmses = np.array([train_rmses, test_rmses])
 
     legend = ["in_sample", "out_of_sample"]
@@ -92,6 +95,7 @@ def experiment_1(train_x, train_y, test_x, test_y):
     ylabel = "RMSE"
     title = "Experiment 1: \nOverfitting wrt leaf_size in DTLearner"
     save_path = "images/experiment_1.png"
+    xticklabels = [0, 1, 6, 11, 16, 21, 26]
     plot_data(
         data=rmses,
         legend=legend,
@@ -99,6 +103,7 @@ def experiment_1(train_x, train_y, test_x, test_y):
         ylabel=ylabel,
         title=title,
         filename=save_path,
+        xticklabels=xticklabels,
     )
 
 
@@ -133,6 +138,7 @@ def experiment_2(train_x, train_y, test_x, test_y):
     ylabel = "RMSE"
     title = "Experiment 2: \nOverfitting wrt leaf_size in BagLearner (#bags = 20)"
     save_path = "images/experiment_2.png"
+    xticklabels = [0, 1, 6, 11, 16, 21, 26]
     plot_data(
         data=rmses,
         legend=legend,
@@ -140,6 +146,7 @@ def experiment_2(train_x, train_y, test_x, test_y):
         ylabel=ylabel,
         title=title,
         filename=save_path,
+        xticklabels=xticklabels,
     )
 
 
@@ -187,6 +194,7 @@ def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
         f"Experiment 3, Metric 1: \nDTLearner vs RTLearner R-Squared value (in-sample)"
     )
     save_path = "images/experiment_3_metric_1_insample.png"
+    xticklabels = [0, 1, 6, 11, 16, 21, 26]
     plot_data(
         data=in_sample_data,
         legend=legend,
@@ -194,6 +202,7 @@ def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
         ylabel=ylabel,
         title=title,
         filename=save_path,
+        xticklabels=xticklabels,
     )
 
     # plot out-of-sample results
@@ -206,12 +215,13 @@ def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
         ylabel=ylabel,
         title=title,
         filename=save_path,
+        xticklabels=xticklabels,
     )
 
 
 def experiment_3_metric_2_traintime(train_x, train_y):
     dataset_sizes = [i for i in range(10, len(train_x), 25)]
-    leaf_size = 1 # choosing small leaf size bc dataset size is also small
+    leaf_size = 1  # choosing small leaf size bc dataset size is also small
     num_trials = 5  ## run a couple trials to get an average runtime
     dt_learner_train_times = []
     rt_learner_train_times = []
@@ -251,6 +261,7 @@ def experiment_3_metric_2_traintime(train_x, train_y):
     ylabel = "time_to_train (ms)"
     title = f"Experiment 3, Metric 2: \nDTLearner vs RTLearner Training Time (ms)"
     save_path = "images/experiment_3_metric_2.png"
+    xticklabels = [0, 10, 60, 110, 160, 210, 260, 310]
     plot_data(
         data=runtimes,
         legend=legend,
@@ -258,7 +269,7 @@ def experiment_3_metric_2_traintime(train_x, train_y):
         ylabel=ylabel,
         title=title,
         filename=save_path,
-        xticks=dataset_sizes,
+        xticklabels=xticklabels,
     )
 
 
