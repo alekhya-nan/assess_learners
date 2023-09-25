@@ -35,13 +35,20 @@ from DTLearner import DTLearner
 from RTLearner import RTLearner
 
 
-def get_RMSE(pred_y, test_y):
-    rmse = math.sqrt(((test_y - pred_y) ** 2).sum() / test_y.shape[0])
+def get_RMSE(pred_y, y):
+    rmse = math.sqrt(((y - pred_y) ** 2).sum() / y.shape[0])
     return rmse
 
-def get_RSquared(pred_y, test_y):
-    correlation = np.corrcoef(pred_y, test_y)[0, 1]
-    return correlation**2
+
+def get_RSquared(pred_y, y):
+    """
+    Used this link to calculate R^2: https://www.statisticshowto.com/probability-and-statistics/coefficient-of-determination-r-squared/
+    The link to find r links here: https://www.statisticshowto.com/probability-and-statistics/correlation-coefficient-formula/
+    numpy's corrcoef uses Pearson's correlation coefficient, which is why we square it to get R^2
+    """
+    r2 = (np.corrcoef(pred_y, y)[0, 1]) ** 2
+    return r2
+
 
 def plot_data(data, legend, xlabel, ylabel, title, filename, xticks=None):
     plt.clf()
@@ -54,10 +61,10 @@ def plot_data(data, legend, xlabel, ylabel, title, filename, xticks=None):
     plt.title(title)
     plt.grid(visible=True)
     plt.savefig(filename)
-    pass
+
 
 def experiment_1(train_x, train_y, test_x, test_y):
-    leaf_sizes = [i for i in range(1, 51)]
+    leaf_sizes = [i for i in range(1, 26)]
     train_rmses = []
     test_rmses = []
 
@@ -79,16 +86,23 @@ def experiment_1(train_x, train_y, test_x, test_y):
     test_rmses = np.array(test_rmses)
     rmses = np.array([train_rmses, test_rmses])
 
-    legend = ["in sample", "out of sample"]
-    xlabel = "leaf size"
+    legend = ["in_sample", "out_of_sample"]
+    xlabel = "leaf_size"
     ylabel = "RMSE"
-    title = "Experiment 1: Overfitting wrt leaf size in DTLearner"
+    title = "Experiment 1: \nOverfitting wrt leaf_size in DTLearner"
     save_path = "images/experiment_1.png"
-    plot_data(rmses, legend, xlabel, ylabel, title, save_path)
+    plot_data(
+        data=rmses,
+        legend=legend,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        title=title,
+        filename=save_path,
+    )
 
 
 def experiment_2(train_x, train_y, test_x, test_y):
-    leaf_sizes = [i for i in range(1, 51)]
+    leaf_sizes = [i for i in range(1, 26)]
     num_bags = 20
     train_rmses = []
     test_rmses = []
@@ -112,12 +126,20 @@ def experiment_2(train_x, train_y, test_x, test_y):
     train_rmses = np.array(train_rmses)
     test_rmses = np.array(test_rmses)
     rmses = np.array([train_rmses, test_rmses])
-    legend = ["in sample", "out of sample"]
-    xlabel = "leaf size"
+
+    legend = ["in_sample", "out_of_sample"]
+    xlabel = "leaf_size"
     ylabel = "RMSE"
-    title = f"Experiment 2: \nOverfitting wrt leaf size in BagLearner (#bags = {num_bags})"
+    title = "Experiment 2: \nOverfitting wrt leaf_size in BagLearner (#bags = 20)"
     save_path = "images/experiment_2.png"
-    plot_data(rmses, legend, xlabel, ylabel, title, save_path)
+    plot_data(
+        data=rmses,
+        legend=legend,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        title=title,
+        filename=save_path,
+    )
 
 
 def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
@@ -156,53 +178,88 @@ def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
     in_sample_data = np.array([rmses["DT_train_r2"], rmses["RT_train_r2"]])
     legend = ["DTLearner", "RTLearner"]
     out_sample_data = np.array([rmses["DT_test_r2"], rmses["RT_test_r2"]])
-    xlabel = "leaf size"
+    xlabel = "leaf_size"
     ylabel = "R^2"
 
     # plot in-sample results
-    title = f"Experiment 3, Metric 1 \nDTLearner vs RTLearner using R-Squared (in-sample)"
+    title = (
+        f"Experiment 3, Metric 1: \nDTLearner vs RTLearner using R-Squared (in-sample)"
+    )
     save_path = "images/experiment_3_metric_1_insample.png"
-    plot_data(in_sample_data, legend, xlabel, ylabel, title, save_path)
+    plot_data(
+        data=in_sample_data,
+        legend=legend,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        title=title,
+        filename=save_path,
+    )
 
     # plot out-of-sample results
-    title = f"Experiment 3, Metric 1 \nDTLearner vs RTLearner using R-Squared (out-of-sample)"
+    title = f"Experiment 3, Metric 1: \nDTLearner vs RTLearner using R-Squared (out-of-sample)"
     save_path = "images/experiment_3_metric_1_outsample.png"
-    plot_data(out_sample_data, legend, xlabel, ylabel, title, save_path)
+    plot_data(
+        data=out_sample_data,
+        legend=legend,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        title=title,
+        filename=save_path,
+    )
 
 
-def experiment_3_metric_2_traintime(train_x, train_y, test_x, test_y):
+def experiment_3_metric_2_traintime(train_x, train_y):
     dataset_sizes = [i for i in range(10, len(train_x), 25)]
     leaf_size = 1
+    num_trials = 5  ## run a couple trials to get an average runtime
     dt_learner_train_times = []
     rt_learner_train_times = []
     print(len(train_x))
 
     for dataset_size in dataset_sizes:
-        # get DTLearner metrics
-        dt_learner = DTLearner(leaf_size=leaf_size)
         train_x_subset = train_x[:dataset_size]
         train_y_subset = train_y[:dataset_size]
 
-        start = time.time()
-        dt_learner.add_evidence(train_x_subset, train_y_subset)
-        train_time = time.time() - start
-        dt_learner_train_times.append(train_time)
+        # get DTLearner metrics
+        dt_learner = DTLearner(leaf_size=leaf_size)
+        dt_learner_trial_times = 0
+        for _ in range(num_trials):
+            start = time.time()
+            dt_learner.add_evidence(train_x_subset, train_y_subset)
+            train_time = time.time() - start
+            dt_learner_trial_times += train_time
+
+        dt_learner_train_time = dt_learner_trial_times / num_trials
+        dt_learner_train_times.append(dt_learner_train_time)
 
         # get RTLearner metrics
         rt_learner = RTLearner(leaf_size=leaf_size)
-        start = time.time()
-        rt_learner.add_evidence(train_x_subset, train_y_subset)
-        train_time = time.time() - start
-        rt_learner_train_times.append(train_time)
+        rt_learner_trial_times = 0
+        for _ in range(num_trials):
+            start = time.time()
+            rt_learner.add_evidence(train_x_subset, train_y_subset)
+            train_time = time.time() - start
+            rt_learner_trial_times += train_time
+
+        rt_learner_train_time = rt_learner_trial_times / num_trials
+        rt_learner_train_times.append(rt_learner_train_time)
 
     # plot runtime
     runtimes = np.array([dt_learner_train_times, rt_learner_train_times])
-    legend = ["DTLearner runtime", "RTLearner runtime"]
-    xlabel = "dataset size"
-    ylabel = "time to train (s)"
-    title = f"Experiment 3, Metric 2 \nDTLearner vs RTLearner Training Time"
+    legend = ["DTLearner", "RTLearner"]
+    xlabel = "dataset_size"
+    ylabel = "time_to_train (s)"
+    title = f"Experiment 3, Metric 2: \nDTLearner vs RTLearner Training Time"
     save_path = "images/experiment_3_metric_2.png"
-    plot_data(runtimes, legend, xlabel, ylabel, title, save_path, xticks=dataset_sizes)
+    plot_data(
+        data=runtimes,
+        legend=legend,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        title=title,
+        filename=save_path,
+        xticks=dataset_sizes,
+    )
 
 
 if __name__ == "__main__":
@@ -240,4 +297,4 @@ if __name__ == "__main__":
     experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y)
 
     # run experiment 3, metric 2
-    experiment_3_metric_2_traintime(train_x, train_y, test_x, test_y)
+    experiment_3_metric_2_traintime(train_x, train_y)
