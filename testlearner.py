@@ -59,6 +59,7 @@ def plot_data(data, legend, xlabel, ylabel, title, filename, xticks=None):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
+    # to make the grid lines more visible for detailed analysis
     plt.grid(visible=True)
     plt.savefig(filename)
 
@@ -179,11 +180,11 @@ def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
     legend = ["DTLearner", "RTLearner"]
     out_sample_data = np.array([rmses["DT_test_r2"], rmses["RT_test_r2"]])
     xlabel = "leaf_size"
-    ylabel = "R^2"
+    ylabel = "R^2 (Coefficient of Determination)"
 
     # plot in-sample results
     title = (
-        f"Experiment 3, Metric 1: \nDTLearner vs RTLearner using R-Squared (in-sample)"
+        f"Experiment 3, Metric 1: \nDTLearner vs RTLearner R-Squared value (in-sample)"
     )
     save_path = "images/experiment_3_metric_1_insample.png"
     plot_data(
@@ -196,8 +197,8 @@ def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
     )
 
     # plot out-of-sample results
-    title = f"Experiment 3, Metric 1: \nDTLearner vs RTLearner using R-Squared (out-of-sample)"
-    save_path = "images/experiment_3_metric_1_outsample.png"
+    title = f"Experiment 3, Metric 1: \nDTLearner vs RTLearner R-Squared value (out-of-sample)"
+    save_path = "images/experiment_3_metric_1_outofsample.png"
     plot_data(
         data=out_sample_data,
         legend=legend,
@@ -210,11 +211,10 @@ def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
 
 def experiment_3_metric_2_traintime(train_x, train_y):
     dataset_sizes = [i for i in range(10, len(train_x), 25)]
-    leaf_size = 1
+    leaf_size = 1 # choosing small leaf size bc dataset size is also small
     num_trials = 5  ## run a couple trials to get an average runtime
     dt_learner_train_times = []
     rt_learner_train_times = []
-    print(len(train_x))
 
     for dataset_size in dataset_sizes:
         train_x_subset = train_x[:dataset_size]
@@ -249,7 +249,7 @@ def experiment_3_metric_2_traintime(train_x, train_y):
     legend = ["DTLearner", "RTLearner"]
     xlabel = "dataset_size"
     ylabel = "time_to_train (s)"
-    title = f"Experiment 3, Metric 2: \nDTLearner vs RTLearner Training Time"
+    title = f"Experiment 3, Metric 2: \nDTLearner vs RTLearner Training Time (s)"
     save_path = "images/experiment_3_metric_2.png"
     plot_data(
         data=runtimes,
