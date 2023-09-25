@@ -53,7 +53,7 @@ def get_RSquared(pred_y, y):
 def plot_data(data, legend, xlabel, ylabel, title, filename, xticks=None):
     plt.clf()
     plt.plot(data.T)
-    plt.legend(legend)
+    plt.legend(legend, loc="lower right")
     if xticks:
         plt.xticks([i for i in range(len(xticks))], labels=xticks)
     plt.xlabel(xlabel)
@@ -144,7 +144,7 @@ def experiment_2(train_x, train_y, test_x, test_y):
 
 
 def experiment_3_metric_1_RSquared(train_x, train_y, test_x, test_y):
-    leaf_sizes = [i for i in range(1, 51)]
+    leaf_sizes = [i for i in range(1, 26)]
     rmses = {"DT_train_r2": [], "DT_test_r2": [], "RT_train_r2": [], "RT_test_r2": []}
 
     for leaf_size in leaf_sizes:
@@ -227,7 +227,7 @@ def experiment_3_metric_2_traintime(train_x, train_y):
             start = time.time()
             dt_learner.add_evidence(train_x_subset, train_y_subset)
             train_time = time.time() - start
-            dt_learner_trial_times += train_time
+            dt_learner_trial_times += train_time * 1000
 
         dt_learner_train_time = dt_learner_trial_times / num_trials
         dt_learner_train_times.append(dt_learner_train_time)
@@ -239,7 +239,7 @@ def experiment_3_metric_2_traintime(train_x, train_y):
             start = time.time()
             rt_learner.add_evidence(train_x_subset, train_y_subset)
             train_time = time.time() - start
-            rt_learner_trial_times += train_time
+            rt_learner_trial_times += train_time * 1000
 
         rt_learner_train_time = rt_learner_trial_times / num_trials
         rt_learner_train_times.append(rt_learner_train_time)
@@ -248,8 +248,8 @@ def experiment_3_metric_2_traintime(train_x, train_y):
     runtimes = np.array([dt_learner_train_times, rt_learner_train_times])
     legend = ["DTLearner", "RTLearner"]
     xlabel = "dataset_size"
-    ylabel = "time_to_train (s)"
-    title = f"Experiment 3, Metric 2: \nDTLearner vs RTLearner Training Time (s)"
+    ylabel = "time_to_train (ms)"
+    title = f"Experiment 3, Metric 2: \nDTLearner vs RTLearner Training Time (ms)"
     save_path = "images/experiment_3_metric_2.png"
     plot_data(
         data=runtimes,
