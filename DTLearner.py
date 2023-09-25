@@ -27,7 +27,7 @@ class DTLearner(object):
             return_leaf = np.array([-1, data_y[0][0], -1, -1])
             return return_leaf.reshape((1, 4))
 
-        # determine best feature to split on
+        # get best feature to split on
         correlation = np.corrcoef(data_x, data_y, rowvar=False)[-1, :-1]
         # we're using absolute correlation (based on assignment instructions)
         correlation = np.abs(correlation)
@@ -60,7 +60,7 @@ class DTLearner(object):
     def query(self, points):
         preds = []
 
-        for idx, point in enumerate(points):
+        for _, point in enumerate(points):
             pred = self.query_point(point)
             preds.append(pred)
 

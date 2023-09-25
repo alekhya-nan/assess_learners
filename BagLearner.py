@@ -2,7 +2,14 @@ import numpy as np
 
 
 class BagLearner(object):
-    def __init__(self, learner, kwargs, bags, boost=False, verbose=False):
+    def __init__(
+        self,
+        learner,
+        kwargs,
+        bags: int = 20,
+        boost: bool = False,
+        verbose: bool = False,
+    ):
 
         self.learners = [learner(**kwargs) for _ in range(bags)]
         self.boost = boost
@@ -16,19 +23,15 @@ class BagLearner(object):
 
         for learner in self.learners:
             learner_idxs = np.random.choice(a=num_rows, size=num_rows)
-            learner_x = data_x[learner_idxs]
-            learner_y = data_y[learner_idxs]
+            learner_data_x = data_x[learner_idxs]
+            learner_data_y = data_y[learner_idxs]
 
-            learner.add_evidence(learner_x, learner_y)
+            learner.add_evidence(learner_data_x, learner_data_y)
 
     def query(self, points):
-        bag_preds = []
+        learner_preds = [learner.query(points) for learner in self.learners]
+        learner_preds = np.array(learner_preds)
+        preds = learner_preds.mean(axis=0)
 
-        for learner in self.learners:
-            pred = learner.query(points)
-            bag_preds.append(pred)
-
-        bag_preds = np.array(bag_preds)
-        preds = bag_preds.mean(axis=0)
         assert len(preds) == len(points)
         return preds

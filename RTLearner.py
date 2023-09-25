@@ -27,7 +27,7 @@ class RTLearner(object):
             return_leaf = np.array([-1, data_y[0][0], -1, -1])
             return return_leaf.reshape((1, 4))
 
-        # determine best feature to split on: in RTLearner, it's random
+        # get best feature to split on; in RTLearner, it's random
         i = np.random.randint(0, data_x.shape[1])
         split_val = np.median(data_x[:, i])
 
@@ -57,7 +57,7 @@ class RTLearner(object):
     def query(self, points):
         preds = []
 
-        for idx, point in enumerate(points):
+        for _, point in enumerate(points):
             pred = self.query_point(point)
             preds.append(pred)
 
